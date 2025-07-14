@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HS and Prediction Charts</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.2.0/exceljs.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            text-align: center;
+        }
+        .button-group {
+            margin: 20px 0;
+        }
+        .hs-button, .prediction-button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .hs-button:hover, .prediction-button:hover {
+            background-color: #2980b9;
+        }
+        .chart-container {
+            position: relative;
+            height: 40vh;
+            width: 80vw;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">                  
+    <h1>HS Code and Prediction Charts</h1>
+    
+    <div class="info-text">
+        Grafik di bawah ini menampilkan data aktual dan prediksi model yang dipilih.
+    </div>
+    
+    <h2>HS Code Data</h2>
+    <div class="button-group">
+        <button class="hs-button" data-hs="all">Total HS 56, 60, 63</button>
+        <button class="hs-button" data-hs="56">HS 56</button>
+        <button class="hs-button" data-hs="60">HS 60</button>
+        <button class="hs-button" data-hs="63">HS 63</button>
+    </div>
+    <div class="chart-container">
+        <canvas id="hsChart"></canvas>
+    </div>
+
+    <h2>Prediction Data</h2>
+    <div class="button-group">
+        <button class="prediction-button" data-model="arima">ARIMA</button>
+        <button class="prediction-button" data-model="arimax">ARIMAX</button>
+        <button class="prediction-button" data-model="lstm">LSTM</button>
+        <button class="prediction-button" data-model="xgboost">XGBoost</button>
+        <button class="prediction-button" data-model="arima-lstm">ARIMA-LSTM</button>
+    </div>
+    <div class="chart-container">
+        <canvas id="predictionChartCanvas"></canvas>
+    </div>
+</div>
+
+<script>
+    // JavaScript code as provided earlier
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const toggleIcon = document.getElementById('toggle-icon');
+        sidebar.classList.toggle('collapsed');
+
+        // Ubah ikon antara hamburger dan silang
+        if (sidebar.classList.contains('collapsed')) {
+            toggleIcon.classList.remove('fa-bars');
+            toggleIcon.classList.add('fa-times');
+        } else {
+            toggleIcon.classList.remove('fa-times');
+            toggleIcon.classList.add('fa-bars');
+        }
+    }
+
+    function showSection(id) {
+        const sections = document.querySelectorAll('.section');
+        const buttons = document.querySelectorAll('.sidebar li');
+        sections.forEach(sec => sec.classList.remove('active'));
+        buttons.forEach(btn => btn.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById(id + '-btn').classList.add('active'); // Tambahkan kelas aktif pada tombol
+    }
+
+    function formatDateToMonthYear(dateString) {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) { // Cek apakah tanggal valid
+            console.error(`Invalid date: ${dateString}`);
+            return 'Invalid Date'; // Kembalikan string yang menunjukkan kesalahan
+        }
+        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 0-based month, jadi +1
+        const year = date.getFullYear();
+        return `${month}-${year}`;
+    }
+
+    const hsData = {
+        '56': { labels: [], values: [] },
+        '60': { labels: [], values: [] },
+        '63': { labels: [], values: [] }
+    };
+    
+    let hsChart = null;
+
+    // Fetch the Excel file for HS data
+    fetch("{{ url_for('static', filename='hs_neg.xlsx') }}")
+        .then(response => response.arrayBuffer())
+        .then(data => {
+            parseExcelHS(data).then(parsedData => {
+                hsData['56'] = parsedData.hs56;
+                hsData['60'] = parsedData.hs60; 
+                hsData['63'] = parsedData.hs63;
+                renderHSChart('all');
+            });
+        })
+        .catch(error => console.error('Error fetching the HS Excel file:', error));
+
+    async function parseExcelHS(data) {
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(data);
+        
+        const worksheet = workbook.worksheets[0];
+        const result = { hs56: { labels: [], values: [] }, hs60: { labels: [], values: [] }, hs63: { labels: [], values: [] } };
+        
+        worksheet.eachRow((row, rowNumber) => {
+            if (rowNumber > 1) { // Skip header row
+                const values = row.values;
+                result.hs56.labels.push(values[1]); // Kolom A: Periode
+                result.hs56.values.push(values[2]); // Kolom B: hs 56 volume
+                result.hs60.values.push(values[3]); // Kolom C: hs 60 volume
+                result.hs63.values.push(values[4]); // Kolom D: hs 63 volume
+            }
+        });
+        
+        return result;
+    }
+    
+    function renderHSChart(hsCode) {
+        const ctx = document.getElementById('hsChart').getContext('2d');
+        
+        if (hsChart) {
+            hsChart.destroy();
+        }
+        
+        let datasets = [];
+        let chartTitle = '';
+        let labelsRaw = hsData['56'].labels; // default pakai label dari HS 56
+        let formattedLabels = labelsRaw.map(label => formatDateToMonthYear(label));
+        
+        if (hsCode === 'all') {
+            chartTitle = 'Total Gabungan Kode HS 56, 60, 63';
+            
+            const sumValues = hsData['56'].values.map((val56, index) => {
+                const val60 = hsData['60'].values[index] || 0; // Handle undefined values
+                const val63 = hsData['63'].values[index] || 0; // Handle undefined values
+                return val56 + val60 + val63;
+            });
+            
+            datasets = [
+                {
+                    label: 'Total HS 56+60+63',
+                    data: sumValues,
+                    borderColor: '#9b59b6',
+                    backgroundColor: 'rgba(155, 89, 182, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }
+            ];
+        } else {
+            chartTitle = `Tren Kode HS ${hsCode}`;
+            
+            datasets = [
+                {
+                    label: `Kode HS ${hsCode}`,
+                    data: hsData[hsCode].values,
+                    borderColor: '#9b59b6',
+                    backgroundColor: 'rgba(155, 89, 182, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }
+            ];
+        }
+        
+        hsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: formattedLabels, // Menggunakan labels dari HS 56
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: chartTitle,
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'Volume (kg)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Periode'
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+    }
+    
+    document.querySelectorAll('.hs-button').forEach(button => {
+        button.addEventListener('click', function() {
+            document.querySelectorAll('.hs-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            this.classList.add('active');
+            
+            const hsCode = this.getAttribute('data-hs');
+            renderHSChart(hsCode);
+        });
+    });
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelector('.hs-button[data-hs="all"]').classList.add('active');
+        renderHSChart('all');
+    });
+
+    const predictionData = {
+        labels: [],
+        actual: [],
+        arima: [],
+        arimax: [],
+        lstm: [],
+        xgboost: [],
+        arima_lstm: []
+    };
+
+    let predictionChartInstance = null;
+
+    // Fetch the Excel file for predictions
+    fetch("{{ url_for('static', filename='arima.xlsx') }}")
+        .then(response => response.arrayBuffer())
+        .then(data => {
+            parseExcelPrediction(data).then(parsedData => {
+                Object.assign(predictionData, parsedData);
+                renderPredictionChart('arima'); // Default to ARIMA predictions
+            });
+        })
+        .catch(error => console.error('Error fetching the prediction Excel file:', error));
+
+    async function parseExcelPrediction(data) {
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(data);
+        
+        const worksheet = workbook.worksheets[0];
+        const result = { labels: [], actual: [], arima: [], arimax: [], lstm: [], xgboost: [], arima_lstm: [] };
+        
+        worksheet.eachRow((row, rowNumber) => {
+            if (rowNumber > 1) { // Skip header row
+                const values = row.values;
+                result.labels.push(values[1]); // Kolom A: Periode
+                result.actual.push(values[2]); // Kolom B: Data Aktual
+                result.arima.push(values[3]); // Kolom C: ARIMA
+                result.arimax.push(values[4]); // Kolom D: ARIMAX
+                result.lstm.push(values[5]); // Kolom E: LSTM
+                result.xgboost.push(values[6]); // Kolom F: XGBoost
+                result.arima_lstm.push(values[7]); // Kolom G: ARIMA-LSTM
+            }
+        });
+        
+        return result;
+    }
+
+    function renderPredictionChart(model) {
+        const ctx = document.getElementById('predictionChartCanvas').getContext('2d');
+        
+        // Destroy the previous chart instance if it exists
+        if (predictionChartInstance) {
+            predictionChartInstance.destroy();
+        }
+        
+        // Prepare datasets for the chart
+        const datasets = [
+            {
+                label: 'Data Aktual',
+                data: predictionData.actual,
+                borderColor: '#2ecc71',
+                backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                tension: 0.3,
+                fill: true
+            },
+            {
+                label: model.toUpperCase(),
+                data: predictionData[model],
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                tension: 0.3,
+                fill: true
+            }
+        ];
+
+        // Create a new chart instance
+        predictionChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: predictionData.labels.map(formatDateToMonthYear), // Format labels
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `Prediksi Model: ${model.toUpperCase()}`,
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'Volume (kg)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Periode'
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+    }
+
+    // Event listeners for prediction model buttons
+    document.querySelectorAll('.prediction-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const model = button.getAttribute('data-model');
+            renderPredictionChart(model);
+        });
+    });
+</script>
+
+</body>
+</html>

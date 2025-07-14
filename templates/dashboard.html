@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard ARIMA-LSTM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f4f7f9;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #0f172a, #1e293b);
+            color: #fff;
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-area i {
+            font-size: 32px;
+            color: #38bdf8;
+        }
+
+        .title-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #f8fafc;
+        }
+
+        .sub-title {
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #1e293b;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar li {
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: background 0.2s;
+        }
+
+        .sidebar li:hover, .sidebar li.active {
+            background-color: #334155;
+        }
+
+        .sidebar i {
+            min-width: 24px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .sidebar.collapsed span {
+            display: none;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 18px;
+            padding: 15px;
+            cursor: pointer;
+            text-align: left;
+            align-self: flex-start;
+            margin-left: 5px;
+        }
+
+        /* *{
+            border: 1px solid red;
+        } */
+
+        .content {
+            flex: 1;
+            /* padding: 30px; */
+            overflow-y: auto;
+            gap: 30px;
+        }
+
+        .section {
+            display: none;
+            padding: 50px;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        input[type="file"] {
+            margin-top: 10px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .image-section {
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .image-section img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .sentimen-image {
+            width: 300px;
+            max-width: 100%;
+            height: auto;
+            /* border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+        }
+
+        
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .hs-button {
+            padding: 12px 24px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .hs-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        .hs-button.active {
+            background-color: #2c3e50;
+        }
+
+        .prediction-button {
+            padding: 12px 24px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .prediction-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        .prediction-button.active {
+            background-color: #2c3e50;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 20px;
+        }
+        
+        .info-text {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+            color: #7f8c8d;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #1e293b;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .centered {
+            text-align: center;
+        }
+
+        #hasil-toc {
+            display: none; /* disembunyikan default */
+            position: sticky;
+            top: 100px;
+            right: 20px;
+            width: 200px;
+            background: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+
+        nav.toc {
+            /* position: fixed; */
+            right: 20px;
+            top: 100px;
+            width: 200px;
+            background: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+
+        .toc a {
+            display: block;
+            margin-bottom: 8px;
+            color: #1e40af;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+            color: #0f172a;
+        }
+
+        /* Tampilkan TOC hanya saat #hasil aktif */
+        .section:not(#hasil).active ~ .toc {
+            display: none;
+        }
+        .section#hasil.active ~ .toc {
+            display: block;
+        }
+
+        .section {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .hs-button {
+                width: 80%;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+
+            #hasil {
+                max-width: 100%;
+            }
+
+            .toc {
+                display: none ;
+            }
+                }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-area">
+            <i class="fas fa-database"></i>
+            <div class="title-text">
+                <div class="main-title">Dashboard Prediksi Impor Tekstil dan Produk Tekstil</div>
+                <div class="sub-title">Menggunakan Indeks Google Trends dan Sentimen Berita</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="sidebar" id="sidebar">
+            <button class="toggle-btn" onclick="toggleSidebar()">
+                <i id="toggle-icon" class="fas fa-bars"></i> <!-- Ikon hamburger awal -->
+            </button>
+            <ul>
+                <li id="latar-btn" onclick="showSection('latar')"><i class="fas fa-book-open"></i><span>Latar Belakang</span></li>
+                <li id="metodologi-btn" onclick="showSection('metodologi')"><i class="fas fa-tools"></i><span>Metodologi</span></li>
+                <li id="hasil-btn" onclick="showSection('hasil')"><i class="fas fa-chart-bar"></i><span>Hasil</span></li>
+                <li id="prediksi-btn" onclick="showSection('prediksi')"><i class="fas fa-robot"></i><span>Simulasi Prediksi</span></li>
+            </ul>
+        </div>
+
+        <div class="content">
+            <div id="latar" class="section active">
+                <h2>Latar Belakang</h2>
+                <p>Industri TPT merupakan salah satu industri prioritas penopang ekonomi nasional. Pada triwulan I tahun 2024, industri TPT mampu menyumbang sebesar 5,84 persen terhadap PDB sektor manufaktur (Kemenperin, 2024). Berdasarkan publikasi BPS, volume impor tekstil Indonesia dalam kurun waktu 2014 hingga 2023 mengalami fluktuasi, akan tetapi tetap dalam tren yang tinggi (BPS, 2024). Volume impor TPT dalam periode Januari sampai Mei 2024 mencapai 839,72 ribu ton, meningkat 10,2% dibandingkan periode yang sama tahun lalu. </p>
+                <p>Pakar ketenagakerjaan UGM, Prof. Dr. Tadjuddin Noer Effendi, menyebutkan bahwa terbitnya Peraturan Menteri Perdagangan Nomor 8 Tahun 2024 yang mempermudah impor barang jadi, termasuk tekstil, menyebabkan impor tekstil ke Indonesia meningkat drastis (UGM, 2025). Hal ini membuat produk tekstil lokal tidak mampu bersaing dengan produk impor yang lebih murah, sehingga beberapa pabrik besar seperti PT Sri Rejeki Isman Tbk (Sritex) melakukan PHK massal terhadap ribuan karyawan akibat penurunan permintaan pasar yang signifikan (UGM, 2025). Hal ini didukung oleh pendapat ekonom Universitas Negeri Sebelas Maret (UNS) Solo, Ernoiz Antriyandarti, bahwa kebijakan relaksasi impor tersebut dapat berdampak signifikan terhadap sektor industri dalam negeri dan serapan tenaga kerja (Indotextiles, 2024).</p>
+                <p>Peningkatan impor tekstil tersebut telah memberikan tekanan besar terhadap industri tekstil dalam negeri, khususnya terhadap keberlangsungan tenaga kerja. Penelitian yang dilakukan oleh Riberio dan Bloom et. Al. menunjukkan bahwa peningkatan impor tekstil memiliki dampak yang signifikan terhadap penurunan jumlah tenaga kerja (Bloom et al., 2016; Ribeiro, 2024). Melimpahnya produk impor tekstil berharga murah menyebabkan produsen tekstil dalam negeri sulit bersaing sehingga banyak pabrik tekstil mengurangi produksi atau bahkan menutup operasionalnya (CNBC Indonesia, 2024; Dika Wulandari, 2012; DPR RI, 2024; Rifa’i, 2025). Sejak tahun 2023, kapasitas produksi industri tekstil dan produk tekstil (TPT) terus mengalami penurunan, dengan rata-rata hanya mencapai 45% (Bloomberg Technoz, 2024). Hal ini mengakibatkan terjadinya pengurangan tenaga kerja di sektor TPT (DPR RI, 2024). Bahkan Konfederasi Serikat Pekerja Nasional (KSPN) menyebutkan bahwa terdapat sekitar 50.000 pekerja industri TPT yang terkena PHK hingga Juni 2024 (Kontan, 2024). Hal ini mengindikasikan adanya tantangan serius yang dihadapi oleh sektor tekstil dalam mempertahankan tenaga kerjanya.</p>
+                <p>Di sisi lain, impor tidak selalu membawa dampak negatif terhadap perekonomian. Impor bahan baku dan bahan penolong sangat dibutuhkan untuk mendukung proses produksi di berbagai sektor industri dalam negeri. Ketua Umum Asosiasi Pengusaha Indonesia (APINDO) menyatakan bahwa Indonesia masih sangat bergantung pada impor, terutama impor bahan baku dan bahan penolong untuk keperluan produksi industri (Detik, 2024). Adji et. al. menyatakan bahwa impor bahan baku memiliki dampak positif pada penyerapan tenaga kerja (Adji et al., 2012). Selain itu, Ghaus & Moenardy menyatakan bahwa impor bahan mentah tekstil China berdampak positif terhadap perkembangan industri tekstil dan perekonomian Indonesia (Ghaus & Moenardy, 2024). Sementara itu, impor pada jenis produk tekstil tertentu seperti pakaian bekas berdampak negatif terhadap perekonomian (Nazhifah et al., 2025). Dampak negatif tersebut berupa berkurangnya pangsa pasar produk lokal di Indonesia, potensi menurunnya kinerja industri TPT nasional, dan menimbulkan kerugian pendapatan negara (DPR RI, 2023). Oleh karena itu, perlu dilakukan identifikasi jenis produk impor tekstil yang berhubungan negatif terhadap jumlah tenaga kerja.</p>
+                <p>Jenis produk dalam perdagangan internasional dapat dilihat melalui klasifikasi kode Harmonized System (HS). Tekstil dan produk tekstil termasuk dalam kode HS 50-63 (Kemenkeu, 2022). Setiap kode HS mewakili jenis produk yang berbeda sehingga mengetahui kode HS yang memiliki korelasi negatif terhadap jumlah tenaga kerja dapat membantu pemerintah dalam merumuskan kebijakan pengendalian impor yang lebih tepat sasaran. </p>
+                <h3>Tabel Kode HS dan Keterangan</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kode HS</th>
+                            <th>Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>50</td>
+                            <td>Sutra</td>
+                        </tr>
+                        <tr>
+                            <td>51</td>
+                            <td>Wol, bulu hewan halus atau kasar; benang bulu kuda dan kain tenunan</td>
+                        </tr>
+                        <tr>
+                            <td>52</td>
+                            <td>Kapas</td>
+                        </tr>
+                        <tr>
+                            <td>53</td>
+                            <td>Serat tekstil nabati lainnya; benang kertas dan kain tenunan dari benang kertas</td>
+                        </tr>
+                        <tr>
+                            <td>54</td>
+                            <td>Filamen buatan; strip dan sejenisnya dari bahan tekstil buatan</td>
+                        </tr>
+                        <tr>
+                            <td>55</td>
+                            <td>Serat stapel buatan</td>
+                        </tr>
+                        <tr>
+                            <td>56</td>
+                            <td>Gumpalan, kain kempa dan bukan tenunan; benang khusus; benang pintal, tali, tambang dan kabel serta barang daripadanya</td>
+                        </tr>
+                        <tr>
+                            <td>57</td>
+                            <td>Karpet dan penutup lantai tekstil lainnya</td>
+                        </tr>
+                        <tr>
+                            <td>58</td>
+                            <td>Kain tenunan khusus; kain tekstil berumbai; renda; permadani dinding; hiasan; sulaman</td>
+                        </tr>
+                        <tr>
+                            <td>59</td>
+                            <td>Kain tekstil diresapi, dilapisi, ditutupi atau dilaminasi; barang tekstil dari jenis yang cocok untuk keperluan industri</td>
+                        </tr>
+                        <tr>
+                            <td>60</td>
+                            <td>Kain rajutan atau kain kaitan</td>
+                        </tr>
+                        <tr>
+                            <td>61</td>
+                            <td>Pakaian dan aksesori pakaian, rajutan atau kaitan</td>
+                        </tr>
+                        <tr>
+                            <td>62</td>
+                            <td>Pakaian dan aksesori pakaian, bukan rajutan atau kaitan</td>
+                        </tr>
+                        <tr>
+                            <td>63</td>
+                            <td>Barang tekstil sudah jadi lainnya; set; pakaian bekas dan barang tekstil bekas; rag</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>Prediksi terhadap volume impor tekstil, khususnya pada kelompok kode HS yang berkorelasi negatif dengan tenaga kerja penting dilakukan untuk mengantisipasi dampaknya terhadap industri lokal. Dengan melakukan prediksi secara akurat, pemerintah dapat menyusun strategi yang lebih efektif dalam menjaga keberlangsungan industri TPT sekaligus melindungi tenaga kerja. Prediksi impor memungkinkan pemerintah untuk merancang kebijakan tarif dan kuota guna melindungi industri tekstil lokal dari banjir produk impor murah. Dengan demikian, prediksi impor tidak hanya berfungsi sebagai alat analisis, tetapi juga sebagai dasar pengambilan keputusan strategis bagi pemerintah dalam mengelola sektor industri (Nurcahyo et al., 2023).</p>
+                <p>Prediksi dapat dilakukan menggunakan beberapa metode, yaitu statistika konvensional, machine learning, dan hybrid. Beberapa metode statistik konvensional seperti ARIMA dan ARIMAX telah dilakukan pada penelitian sebelumnya dalam melakukan peramalan ekspor dan impor (Alam, 2019; Amri et al., 2023; Dave et al., 2021; Ghauri et al., 2020; Lindyawati et al., 2024). ARIMA cocok untuk data deret waktu linear (Gifty & Yang Li, 2024), sementara ARIMAX memasukkan variabel eksogen sehingga dapat meningkatkan akurasi prediksi (Amri et al., 2023). Selain itu, metode machine learning seperti XGBoost dan LSTM digunakan dalam peramalan ekspor udang (Abyasa & Nurmawati, 2024). XGBoost mampu menangkap hubungan nonlinear dalam data dan memiliki skalabilitas yang tinggi (Gifty & Yang Li, 2024), sedangkan metode LSTM mampu menangani data deret waktu dengan pola nonlinear serta mampu menangkap dependensi jangka panjang dalam data (Dave et al., 2021). Sementara itu, metode hybrid ARIMA-LSTM digunakan untuk memprediksi ekspor Indonesia (Dave et al., 2021). Metode ini menggabungkan kemampuan ARIMA dalam menangani pola linear dengan kemampuan LSTM dalam menangani pola nonlinear sehingga meningkatkan akurasi prediksi (Dave et al., 2021).</p>
+                <p>Metode ARIMAX dan machine learning memerlukan adanya variabel eksogen agar mendapatkan hasil yang lebih akurat (Yucesan et al., 2021). Variabel eksogen adalah variabel yang diasumsikan memengaruhi variabel lain (Putri et al., 2018). Mauliza dan Andriyani menyatakan bahwa nilai kurs mata uang rupiah terhadap USD dan produksi tekstil secara parsial berpengaruh secara signifikan terhadap volume impor tekstil (Mauliza & Andriyani, 2021). Jika nilai kurs menguat, harga barang impor lebih murah sehingga impor cenderung meningkat dan sebaliknya (Adhalia et al., 2020; Mauliza & Andriyani, 2021). Sementara itu, indeks produksi tekstil mencerminkan kapasitas produksi domestik dalam memenuhi permintaan pasar. Apabila produksi domestik tidak mampu memenuhi permintaan, negara akan meningkatkan impor untuk memenuhi kebutuhan sesuai dengan teori perdagangan internasional Heckscher-Ohlin yang menyatakan bahwa negara mengimpor barang yang produksinya kurang efisien atau tidak tersedia secara domestik. </p>
+                <p>Penggunaan indeks Google Trends dan sentimen berita telah banyak digunakan untuk meningkatkan akurasi peramalan (Abyasa & Nurmawati, 2024; Apriliani & Nurmawati, 2024; Ayuningtyas & Wirawati, 2021; Giri et al., 2019; Lukauskas et al., 2022). Google Trends dapat digunakan sebagai indikator sentimen publik atau tingkat ketertarikan di bidang ekonomi sehingga dapat dimanfaatkan untuk memprediksi kondisi ekonomi makro (Yusuf Kamal et al., 2024). Sementara itu, Lukauskas et. al. menunjukkan bahwa penggunaan sentimen negatif media massa di Lithuania dalam peramalan aktivitas ekonomi dapat mengurangi kesalahan model dengan MAPE lebih rendah (Lukauskas et al., 2022). Shapiro et al. (2022) juga menemukan bahwa sentimen dapat memprediksi hasil ekonomi masa depan (A. H. Shapiro et al., 2022). Sentimen yang diekstrak dari artikel berita mempunyai kontribusi terhadap perkiraan indikator makro ekonomi (Gerrish & Blei, 2011; Sukmana et al., 2022). Penelitian (Adriansah et al., 2020) menunjukkan bahwa sentimen berita dapat digunakan untuk menilai dan membandingkan perkembangan neraca perdagangan, termasuk impor. Oleh karena itu, variabel eksogen yang digunakan dalam penelitian ini yaitu nilai kurs rupiah terhadap USD, indeks produksi tekstil, indeks Google Trends, dan sentimen berita online terkait impor tekstil. </p>
+            </div>
+
+            <div id="metodologi" class="section">
+                <h2>Metodologi</h2>
+                <div class="image-section">
+                    <img src="{{ url_for('static', filename='Business Understanding (1).png') }}" alt="CRISP-DM" />
+                </div>
+                <p>Proses pengembangan model prediksi dilakukan berdasarkan metodologi CRISP-DM yang terdiri atas enam tahapan utama: Business Understanding, Data Understanding, Data Preparation, Modeling, Evaluation, dan Deployment.</p>
+                <p>Pada tahap <b>Business Understanding</b>, ditetapkan tujuan untuk membangun model prediksi impor tekstil Indonesia sebagai dasar perumusan kebijakan ekonomi. Tahap <b>Data Understanding</b> melibatkan pengumpulan dan eksplorasi awal terhadap data. Selanjutnya, <b>Data Preparation</b> mencakup pemrosesan awal, pelabelan sentimen berita, perhitungan korelasi, serta seleksi fitur. Pada tahap <b>Modeling</b>, dilakukan pembangunan model prediksi menggunakan metode statistik konvensional yaitu ARIMA DAN ARIMAX, machine learning seperti LSTM dan XGBoost, hybrid ARIMA-LSTM. <b>Evaluation</b> dilakukan dengan mengukur akurasi model menggunakan metrik seperti MAE, RMSE, dan MAPE. Terakhir, tahap <b>Deployment</b> membuat web story mengenai prediksi impor tekstil Indonesia.</p>
+            </div>
+            
+            <div class="hasil-wrapper">
+            <div id="hasil" class="section">
+                <h2 id="hasil-title">Hasil</h2>
+                <h3 id="data">Data Understanding</h3>
+                <p>Penelitian ini menggunakan enam jenis data, yaitu volume impor TPT, jumlah tenaga kerja lapangan usaha tekstil, kurs rupiah terhadap USD, indeks produksi tekstil, indeks google trends, dan berita online yang berkaitan dengan impor tekstil. Data-data tersebut dikumpulkan dari periode Januari 2014 hingga Juni 2024, kecuali data jumlah tenaga kerja lapangan usaha tekstil yang dikumpulkan dari periode 2014-2022..</p>
+ 
+                <h3 id="pemrosesan">Pemrosesan Awal</h3>
+                <p>Pemrosesan awal data volume impor TPT Indonesia dilakukan dengan menjumlahkan data berdasarkan bulan, tahun, dan kode HS dari 14 kode HS impor TPT yang terkait. Selanjutnya, untuk keperluan dataset pertama, volume impor TPT tersebut diagregasi dalam interval tahunan dari tahun 2014 hingga 2021 berdasarkan kode HS. </p>
+                <p>Pemrosesan awal data pada berita online dilakukan dengan menghapus beberapa berita yang link-nya mengandung subdomain "travel.detik.com", "oto.detik.com", atau "food.detik.com". Hal ini dilakukan karena berita pada "travel.detik.com" umumnya berisi informasi destinasi wisata, "oto.detik.com" membahas otomotif, dan "food.detik.com" fokus pada ulasan makanan khas daerah. Konten-konten tersebut dianggap tidak relevan untuk analisis impor tekstil. Penghapusan ini juga bertujuan untuk mengurangi jumlah data yang harus dianalisis sehingga lebih efisien dalam penggunaan sumber daya pada analisis skala besar. Setelah itu, dilakukan penyaringan terhadap berita yang memuat frasa "impor tekstil", "PHK", atau "kebijakan impor". Setelah seluruh proses pemrosesan awal selesai, jumlah berita yang tersisa adalah 204 berita.</p>
+
+                <h3 id="korelasi">Hasil Korelasi</h3>
+                <p>Sebelum dilakukan perhitungan korelasi Pearson, terlebih dahulu diuji asumsi normalitas terhadap data tenaga kerja, data impor seluruh kode HS TPT, dan setiap kode HS TPT menggunakan uji Shapiro-Wilk. Hasil uji menunjukkan bahwa data impor seluruh kode HS TPT dan data impor untuk sebagian besar kode HS telah memenuhi asumsi normalitas (nilai p-value > 0,05), kecuali kode HS 56 yang memiliki p-value di bawah 0,05, yang berarti distribusinya tidak normal. Setelah dilakukan transformasi pada data kode HS 56, dilakukan kembali uji normalitas dengan nilai statistik sebesar 0,8387 dan p-value sebesar 0,0559 sehingga data telah memenuhi asumsi normalitas.</p>
+                <div class="image-section">
+                    <img src="{{ url_for('static', filename='plot_neg.png') }}" alt="Hasil Korelasi" />
+                </div>
+                    <p>Pada tabel, dapat dilihat bahwa tidak semua kode HS volume impor TPT berkorelasi negatif dengan jumlah tenaga kerja lapangan usaha tekstil. Kode HS volume impor TPT yang berkorelasi negatif antara lain 56, 60, dan 63. Hal ini mengindikasikan bahwa ketika volume impor untuk kode HS 56, 60, dan 63 meningkat, maka jumlah tenaga kerja lapangan usaha tekstil akan menurun, dan sebaliknya. Kode HS 56 mencakup gumpalan, kain kempa, dan bukan tenunan; benang khusus; benang pintal, tali, tambang, kabel, dan barang yang terbuat dari bahan-bahan tersebut. Selanjutnya, kode HS 60 mengacu pada kain rajutan atau kaitan. Sementara itu, kode HS 63 mencakup barang tekstil jadi lainnya; set; pakaian bekas dan barang tekstil bekas; kain perca. Kode-kode HS tersebut kemudian diagregasi menjadi variabel Y, yang kemudian digunakan sebagai untuk melakukan prediksi</p>
+                
+                <h3 id="sentimen">Pelabelan Sentimen</h3>
+                <p>Jumlah berita online dikumpulkan dengan kata kunci “impor tekstil” sebanyak 979 berita. Setelah dilakukan pemrosesan awal data didapatkan sebanyak 204 berita. Selanjutnya dilakukan proses pelabelan secara manual oleh satu orang anotator terhadap keseluruhan berita. </p>
+                <div class="image-section">
+                    <img class="sentimen-image" src="{{ url_for('static', filename='sentimen.png') }}" alt="Hasil Pelabelan Sentimen" />
+                </div>
+                <p>Terdapat 115 berita berlabel positif yang membahas mengenai kebijakan pemerintah yang berpotensi mengurangi impor tekstil dan produk tekstil (TPT), 2 berita berlabel netral yang yang tidak berdampak langsung pada pengurangan atau peningkatan impor TPT, dan 87 berita berlabel negatif yang diberikan pada berita-berita yang membahas mengenai kebijakan pemerintah yang berpotensi meningkatkan impor TPT.</p>
+                <p>Untuk memeriksa reliabilitas pelabelan manual yang telah dilakukan, dilakukan pengujian inter-annotator agreement dengan mengambil sampel 50% dari data berita dan dilabeli ulang oleh seorang anotator kedua. Reliabilitas hasil pelabelan ini kemudian diukur menggunakan Cohen's Kappa. Hasil pengukuran menunjukkan bahwa nilai Cohen’s Kappa sebesar 0,809. Menurut interpretasi yang dikemukakan oleh Landis dan Koch (1977), nilai Cohen's Kappa antara 0,81–1,00 termasuk dalam kategori "Almost Perfect Agreement" atau kesepakatan yang sangat tinggi (Landis & Koch, 1977). </p>
+
+                <h3 id="seleksi">Seleksi Fitur</h3>
+                <p>Hasil seleksi fitur menggunakan LASSO didapatkan tujuh variabel yang paling berpengaruh terhadap impor TPT di Indonesia, yaitu Indeks Google Trends dengan kata kunci “sutera”, “rajutan”, “baju”, dan “thrift”, kurs rupiah, indeks produksi tekstil, serta persentase jumlah berita dengan sentimen positif di bulan tersebut.</p>
+                <h4>Tabel Koefisien Variabel</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Variabel</th>
+                            <th>Koefisien</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>IGT_thrift</td>
+                            <td>4,269730e+06</td>
+                        </tr>
+                        <tr>
+                            <td>indeks produksi tekstil</td>
+                            <td>2,106746e+06</td>
+                        </tr>
+                        <tr>
+                            <td>kurs rupiah</td>
+                            <td>1,252430e+06</td>
+                        </tr>
+                        <tr>
+                            <td>IGT_sutera</td>
+                            <td>9,602556e+05</td>
+                        </tr>
+                        <tr>
+                            <td>IGT_rajutan</td>
+                            <td>-6,015628e+04</td>
+                        </tr>
+                        <tr>
+                            <td>persen positif</td>
+                            <td>-3,068740e+05</td>
+                        </tr>
+                        <tr>
+                            <td>IGT_baju</td>
+                            <td>-5,197194e+05</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 id="eksplorasi">Eksplorasi Data</h3>
+                <p>Gambar berikut menunjukkan perkembangan volume impor TPT kode HS 56, 60, dan 63 dari Januari 2014 hingga Juni 2024. </p>
+                <div class="container">                  
+                    <div class="info-text">
+                        Klik salah satu kode HS di bawah untuk melihat grafik trennya.
+                    </div>
+                    <div class="button-group">
+                        <button class="hs-button" data-hs="56">Kode HS 56</button>
+                        <button class="hs-button" data-hs="60">Kode HS 60</button>
+                        <button class="hs-button" data-hs="63">Kode HS 63</button>
+                        <button class="hs-button" data-hs="all">Total Kode HS 56, 60, 63</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="hsChart"></canvas>
+                    </div>
+                </div>
+
+                <h3 id="modelling">Modelling</h3>
+                <h4>ARIMA</h4>
+                <P>Berdasarkan hasil auto_arima() dan manual, model ARIMA(2,2,1) dipilih sebagai model terbaik karena memiliki nilai AIC paling rendah, yaitu 3335,641. Langkah selanjutnya adalah melakukan uji diagnostik model. Uji diagnostik ini bertujuan untuk mengetahui apakah residual dari model yang dibangun telah memenuhi asumsi-asumsi dalam pemodelan. Hasil uji Ljung-Box menunjukkan bahwa nilai p-value sebesar 0,59. Hal ini mengindikasikan bahwa tidak terdapat autokorelasi yang signifikan pada residual, sehingga residual dapat dianggap bersifat acak. Uji Jarque-Bera (JB) menghasilkan nilai p-value sebesar 0,08, yang menunjukkan bahwa residual berdistribusi normal karena nilai p lebih besar dari 0,05. Uji heteroskedastisitas menghasilkan nilai p-value sebesar 0,92, sehingga tidak terdapat cukup bukti untuk menolak asumsi homoskedastisitas. Dengan demikian, dapat disimpulkan bahwa residual dari model ARIMA(2,2,1) telah memenuhi uji diagnostik model, yaitu bersifat acak, normal, dan homoskedastik, sehingga model dapat dikatakan valid untuk digunakan dalam peramalan. </P>
+                <h4>ARIMAX</h4>
+                <P>Sebelum membangun model ARIMAX, perlu dilakukan pengecekan stasioner variabel eksogen menggunakan uji ADF. Setelah seluruh variabel eksogen sudah stasioner, selanjutnya dilakukan pembangunan model ARIMAX. Berdasarkan hasil auto_arima() dan manual, model ARIMAX(2,2,1) dipilih sebagai model terbaik karena memiliki nilai AIC paling rendah, yaitu 3313,962. Selanjutnya, dilakukan uji diagnostik terhadap model ARIMAX(2,2,1). Hasil uji Ljung-Box menunjukkan bahwa nilai p-value Ljung-Box (L1) sebesar 0,53. Hal ini mengindikasikan bahwa tidak terdapat autokorelasi yang signifikan pada residual, sehingga residual dapat dianggap bersifat acak. Uji Jarque-Bera (JB) menghasilkan nilai p-value sebesar 0,00, yang menunjukkan bahwa residual tidak berdistribusi normal. Uji heteroskedastisitas menghasilkan nilai p-value sebesar 0,28, sehingga tidak terdapat cukup bukti untuk menolak asumsi homoskedastisitas. Model ini memenuhi asumsi white noise dan homoskedastisitas, tetapi tidak memenuhi asumsi normalitas residual. </P>
+                <h4>LSTM</h4>
+                <p>Model LSTM terbaik menggunakan 192 unit pada hidden layer. Untuk mencegah overfitting, 10% dari neuron pada hidden layer secara acak diabaikan menggunakan teknik dropout dengan rate sebesar 0,1. Learning rate yang digunakan dalam model ini adalah 0,01, yang membantu dalam penyesuaian bobot secara bertahap. Model ini juga menggunakan optimizer Adam untuk mempercepat konvergensi selama proses training. Selain itu, data dilatih dalam batch berukuran 32 sampel pada setiap iterasi, dengan total 100 epochs yang dilakukan untuk mencapai hasil optimal. Model yang terbentuk akan menggunakan satu data pada masa lalu untuk memprediksi data berikutnya.</p>
+                <h4>XGBoost</h4>
+                <p>Model XGBoost terbaik menggunakan 200 estimator, yang berarti model melakukan 200 iterasi untuk membentuk pohon keputusan yang paling optimal. Pohon pada model ini memiliki kedalaman maksimal 3, yang membantu mencegah overfitting dengan membatasi kompleksitas model. Learning rate yang digunakan sebesar 0,01, yang berfungsi untuk mengatur kontribusi setiap pohon baru dalam proses boosting sehingga model dapat mencapai konvergensi secara bertahap. Selain itu, parameter yang mendorong terjadinya pruning (gamma) terbaik yaitu 0, sementara parameter lambda terbaik yaitu 10 guna mengurangi risiko overfitting. </p>
+                <h4>ARIMA-LSTM</h4>
+                <p>Tahap pertama dalam pemodelan ARIMA-LSTM adalah melakukan pemodelan menggunakan ARIMA terbaik yang telah diperoleh sebelumnya yaitu ARIMA(2,2,1). Setelah model ARIMA terbentuk, langkah selanjutnya adalah menghitung residual dari model tersebut. Selanjutnya, residual dari model ARIMA digunakan untuk melatih model LSTM. Pembangunan model LSTM juga dilakukan dengan mencari parameter yang paling optimal. Model LSTM terbaik menggunakan 128 unit pada hidden layer. Untuk mencegah overfitting, 20% dari neuron pada hidden layer secara acak diabaikan menggunakan teknik dropout dengan rate sebesar 0,2. Learning rate yang digunakan dalam model ini adalah 0,001, yang membantu dalam penyesuaian bobot secara bertahap. Model ini juga menggunakan optimizer Adam untuk mempercepat konvergensi selama proses training. Selain itu, data dilatih dalam batch berukuran 32 sampel pada setiap iterasi, dengan total 100 epochs yang dilakukan untuk mencapai hasil optimal. Model yang terbentuk akan menggunakan enam data pada masa lalu untuk memprediksi data berikutnya.</p>
+
+                <h4>Grafik Hasil Prediksi Model</h4>
+                <div class="container">                  
+                    <div class="info-text">
+                        Grafik di bawah ini menampilkan hasil prediksi masing-masing model yang dipilih.
+                    </div>
+                    <div class="button-group">
+                        <button class="prediction-button" data-model="arima">ARIMA</button>
+                        <button class="prediction-button" data-model="arimax">ARIMAX</button>
+                        <button class="prediction-button" data-model="lstm">LSTM</button>
+                        <button class="prediction-button" data-model="xgboost">XGBoost</button>
+                        <button class="prediction-button" data-model="arimalstm">ARIMA-LSTM</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="predictionChartCanvas"></canvas>
+                    </div>
+                </div>
+
+                <h3 id="evaluasi">Evaluasi Model</h3>
+                <h4>Tabel Nilai Akurasi Model</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Metode</th>
+                            <th>RMSE (kg)</th>
+                            <th>MAE (kg)</th>
+                            <th>MAPE (%)</th>
+                            <th>Waktu Training (detik)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" class="centered">Statistik Konvensional</td>
+                        </tr>
+                        <tr>
+                            <td>ARIMA</td>
+                            <td>6658740,04</td>
+                            <td>5199571,87</td>
+                            <td>14,86%</td>
+                            <td>0,12</td>
+                        </tr>
+                        <tr>
+                            <td>ARIMAX</td>
+                            <td>13055473,956</td>
+                            <td>11654157,327</td>
+                            <td>34,40%</td>
+                            <td>0,74</td>
+                        </tr>
+                        <tr>
+                            <td colspan="5" class="centered">Machine Learning</td>
+                        </tr>
+                        <tr>
+                            <td>LSTM</td>
+                            <td>7175985,43</td>
+                            <td>5251438,64</td>
+                            <td>16,41%</td>
+                            <td>10,54</td>
+                        </tr>
+                        <tr>
+                            <td>XGBoost</td>
+                            <td>9250130,76</td>
+                            <td>8359154,85</td>
+                            <td>21,94%</td>
+                            <td>0,63</td>
+                        </tr>
+                        <tr>
+                            <td colspan="5" class="centered">Hybrid</td>
+                        </tr>
+                        <tr>
+                            <td><b>ARIMA-LSTM</b></td>
+                            <td><b>4103511,65</b></td>
+                            <td><b>3194740,92</b></td>
+                            <td><b>8,96%</b></td>
+                            <td><b>20,66</b></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>Berdasarkan hasil perbandingan, model ARIMA-LSTM memiliki kinerja terbaik dengan nilai RMSE, MAE, dan MAPE terendah, yaitu masing-masing sebesar 4103511,65, 3194740,92, dan 8,96%. Hasil ini menunjukkan bahwa model ARIMA-LSTM mampu memprediksi dengan kesalahan yang lebih rendah dibandingkan model lainnya. Hasil ini konsisten dengan temuan Dave et. al (2021), yang menyatakan bahwa pendekatan hybrid antara ARIMA dan LSTM mampu memberikan prediksi yang lebih akurat dibandingkan model tunggal (Dave et al., 2021). Hasil ini menunjukkan bahwa metode hybrid memberikan kinerja prediktif yang lebih baik dibandingkan metode statistik konvensional dan machine learning. Model hybrid ARIMA-LSTM memiliki keunggulan dalam menggabungkan kelebihan kedua pendekatan. ARIMA secara efektif memodelkan pola linear, sedangkan LSTM unggul dalam menangkap pola non-linear dan dependensi jangka panjang dalam data deret waktu. Kombinasi ini memungkinkan model hybrid untuk memberikan prediksi yang lebih akurat dan stabil.</p>
+                <p>Namun, dari sisi waktu pelatihan, ARIMA-LSTM membutuhkan waktu paling lama, yaitu 20,66 detik, jauh lebih besar dibandingkan ARIMA (0,12 detik), ARIMAX (0,40 detik), dan XGBoost (0,63 detik). LSTM juga memiliki waktu pelatihan tinggi (11,95 detik) yang mencerminkan kompleksitas model. Meskipun demikian, dalam konteks prediksi makroekonomi seperti impor bulanan, waktu pelatihan dalam hitungan detik masih tergolong wajar dan layak dikompromikan demi akurasi yang signifikan. </p>
+                <p>Dengan mempertimbangkan trade-off antara akurasi dan efisiensi waktu pelatihan, ARIMA-LSTM tetap menjadi model yang paling unggul dalam penelitian ini. Model ini layak dipilih sebagai dasar pengambilan keputusan karena mampu memprediksi dengan lebih akurat meskipun memerlukan sedikit waktu lebih lama dalam pelatihan.</p>
+                <p>Model ARIMA-LSTM dipilih sebagai model terbaik untuk memprediksi volume impor TPT. Prediksi dilakukan untuk 12 bulan ke depan yaitu Juli 2024 – Juni 2025. </p>
+                           
+                <h3 id="pred">Hasil Prediksi</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bulan</th>
+                            <th>Prediksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Juli 2024</td>
+                            <td>39418123,54</td>
+                        </tr>
+                        <tr>
+                            <td>Agustus 2024</td>
+                            <td>40408614,06</td>
+                        </tr>
+                        <tr>
+                            <td>September 2024</td>
+                            <td>39041931,17</td>
+                        </tr>
+                        <tr>
+                            <td>Oktober 2024</td>
+                            <td>37967563,72</td>
+                        </tr>
+                        <tr>
+                            <td>November 2024</td>
+                            <td>39002385,25</td>
+                        </tr>
+                        <tr>
+                            <td>Desember 2024</td>
+                            <td>40975799,03</td>
+                        </tr>
+                        <tr>
+                            <td>Januari 2025</td>
+                            <td>40560908,24</td>
+                        </tr>
+                        <tr>
+                            <td>Februari 2025</td>
+                            <td>40339267,81</td>
+                        </tr>
+                        <tr>
+                            <td>Maret 2025</td>
+                            <td>40329566,89</td>
+                        </tr>
+                        <tr>
+                            <td>April 2025</td>
+                            <td>40485118,32</td>
+                        </tr>
+                        <tr>
+                            <td>Mei 2025</td>
+                            <td>41118593,64</td>
+                        </tr>
+                        <tr>
+                            <td>Juni 2025</td>
+                            <td>41617277,40</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total</strong></td>
+                            <td><strong>481265149,1</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>Berdasarkan Tabel, total volume impor TPT dengan kode HS 56, 60, dan 63 pada periode Juli 2024 – Juni 2025 mengalami kenaikan sebesar 9,90% dibandingkan dengan periode yang sama tahun lalu. Peningkatan ini menjadi peringatan dini bagi pemerintah untuk merumuskan kebijakan yang efektif dan aplikatif dalam membatasi impor TPT dengan kode HS 56, 60, dan 63.</p>
+                <p>Pemerintah dapat menggunakan hasil prediksi ini untuk merumuskan intervensi berbasis data seperti penguatan monitoring terhadap impor tekstil terutama kode HS 56, 60, 63 dan menyusun kebijakan safeguard selektif terhadap impor pada kode HS tersebut. Pemerintah perlu memastikan bahwa setiap potensi pengurangan impor diiringi oleh peningkatan kapasitas produksi dalam negeri agar peluang penyerapan tenaga kerja benar-benar dapat dimanfaatkan. Dukungan dalam bentuk insentif produksi, pelatihan keterampilan tenaga kerja, serta investasi dalam teknologi manufaktur tekstil menjadi sangat penting untuk menjembatani pergeseran ini.</p>
+            </div>
+            </div>
+
+            <div id="prediksi" class="section">
+                <h2>Simulasi Prediksi Impor</h2>
+                <iframe src="/prediksi" width="100%" height="600" frameborder="0" style="background: #fff;"></iframe>       
+            </div>
+
+        </div>
+        <nav class="toc" id="hasil-toc">
+            <a href="#data">Data Understanding</a>
+            <a href="#pemrosesan">Pemrosesan Awal</a>
+            <a href="#korelasi">Korelasi</a>
+            <a href="#sentimen">Sentimen</a>
+            <a href="#seleksi">Seleksi Fitur</a>
+            <a href="#eksplorasi">Eksplorasi</a>
+            <a href="#modelling">Modelling</a>
+            <a href="#evaluasi">Evaluasi</a>
+            <a href="#pred">Hasil Prediksi</a>
+        </nav>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleIcon = document.getElementById('toggle-icon');
+            sidebar.classList.toggle('collapsed');
+
+            // Ubah ikon antara hamburger dan silang
+            if (sidebar.classList.contains('collapsed')) {
+                toggleIcon.classList.remove('fa-bars');
+                toggleIcon.classList.add('fa-times');
+            } else {
+                toggleIcon.classList.remove('fa-times');
+                toggleIcon.classList.add('fa-bars');
+            }
+        }
+
+        function showSection(id) {
+            const sections = document.querySelectorAll('.section');
+            const buttons = document.querySelectorAll('.sidebar li');
+            sections.forEach(sec => sec.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.getElementById(id + '-btn').classList.add('active'); // Tambahkan kelas aktif pada tombol
+        }
+
+        function formatDateToMonthYear(dateString) {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) { // Cek apakah tanggal valid
+                console.error(`Invalid date: ${dateString}`);
+                return 'Invalid Date'; // Kembalikan string yang menunjukkan kesalahan
+            }
+            const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 0-based month, jadi +1
+            const year = date.getFullYear();
+            return `${month}-${year}`;
+        }
+
+        const hsData = {
+            '56': { labels: [], values: [] },
+            '60': { labels: [], values: [] },
+            '63': { labels: [], values: [] }
+        };
+        
+        let chart = null;
+
+        // Fetch the Excel file from the server
+        // fetch('../static/hs_neg.xlsx') // Ganti dengan path file Excel Anda
+        fetch("{{ url_for('static', filename='hs_neg.xlsx') }}")
+            .then(response => response.arrayBuffer())
+            .then(data => {
+                parseExcel(data).then(parsedData => {
+                    hsData['56'] = parsedData.hs56;
+                    hsData['60'] = parsedData.hs60; 
+                    hsData['63'] = parsedData.hs63;
+                    renderChart('all');
+                });
+            })
+            .catch(error => console.error('Error fetching the Excel file:', error));
+
+        async function parseExcel(data) {
+            const workbook = new ExcelJS.Workbook();
+            await workbook.xlsx.load(data);
+            
+            const worksheet = workbook.worksheets[0];
+            const result = { hs56: { labels: [], values: [] }, hs60: { labels: [], values: [] }, hs63: { labels: [], values: [] } };
+            
+            worksheet.eachRow((row, rowNumber) => {
+                if (rowNumber > 1) { // Skip header row
+                    const values = row.values;
+                    result.hs56.labels.push(values[1]); // Kolom A: Periode
+                    result.hs56.values.push(values[2]); // Kolom B: hs 56 volume
+                    result.hs60.values.push(values[3]); // Kolom C: hs 60 volume
+                    result.hs63.values.push(values[4]); // Kolom D: hs 63 volume
+                }
+            });
+            
+            return result;
+        }
+        
+        function renderChart(hsCode) {
+            const ctx = document.getElementById('hsChart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            let datasets = [];
+            let chartTitle = '';
+            let labelsRaw = hsData['56'].labels; // default pakai label dari HS 56
+            let formattedLabels = labelsRaw.map(label => formatDateToMonthYear(label));
+            
+            if (hsCode === 'all') {
+                chartTitle = 'Total Gabungan Kode HS 56, 60, 63';
+                
+                const sumValues = hsData['56'].values.map((val56, index) => {
+                    const val60 = hsData['60'].values[index] || 0; // Handle undefined values
+                    const val63 = hsData['63'].values[index] || 0; // Handle undefined values
+                    return val56 + val60 + val63;
+                });
+                
+                datasets = [
+                    {
+                        label: 'Total HS 56+60+63',
+                        data: sumValues,
+                        borderColor: '#F97316',            // Tailwind Orange   
+                        backgroundColor: 'rgba(249, 115, 22, 0.15)',
+                        tension: 0.3,
+                        fill: true
+                    }
+                ];
+            } else {
+                chartTitle = `Tren Kode HS ${hsCode}`;
+                
+                datasets = [
+                    {
+                        label: `Kode HS ${hsCode}`,
+                        data: hsData[hsCode].values,
+                        borderColor: '#F97316',            // Tailwind Orange   
+                        backgroundColor: 'rgba(249, 115, 22, 0.15)',
+                        tension: 0.3,
+                        fill: true
+                    }
+                ];
+            }
+            
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: formattedLabels, // Menggunakan labels dari HS 56
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: chartTitle,
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Volume (kg)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Periode'
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+        }
+        
+        document.querySelectorAll('.hs-button').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.hs-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                this.classList.add('active');
+                
+                const hsCode = this.getAttribute('data-hs');
+                renderChart(hsCode);
+            });
+        });
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('.hs-button[data-hs="all"]').classList.add('active');
+            renderChart('all');
+        });
+
+        function showSection(sectionId) {
+            // Sembunyikan semua section
+            document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
+
+            // Tampilkan section yang dipilih
+            const activeSection = document.getElementById(sectionId);
+            if (activeSection) {
+                activeSection.style.display = 'block';
+            }
+
+            // Tampilkan TOC hanya jika hasil yang aktif
+            const toc = document.getElementById('hasil-toc');
+            if (sectionId === 'hasil') {
+                toc.style.display = 'block';
+            } else {
+                toc.style.display = 'none';
+            }
+
+            // Tambahkan class 'active' ke tombol menu yang diklik
+            document.querySelectorAll('ul li').forEach(li => {
+                li.classList.remove('active');
+            });
+
+            // Tambahkan active ke item yang sesuai dengan sectionId
+            const activeBtn = document.getElementById(sectionId + '-btn');
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        }
+
+            const predictionData = {
+                labels: [],
+                actual: [],
+                arima: [],
+                arimax: [],
+                lstm: [],
+                xgboost: [],
+                arimalstm: []
+            };
+
+            let predictionChartInstance = null;
+
+            // Fetch the Excel file for predictions
+            fetch("{{ url_for('static', filename='arima.xlsx') }}")
+                .then(response => response.arrayBuffer())
+                .then(data => {
+                    parseExcelPrediction(data).then(parsedData => {
+                        Object.assign(predictionData, parsedData);
+                        renderPredictionChart('arima'); // Default to ARIMA predictions
+                    });
+                })
+                .catch(error => console.error('Error fetching the prediction Excel file:', error));
+
+            async function parseExcelPrediction(data) {
+                const workbook = new ExcelJS.Workbook();
+                await workbook.xlsx.load(data);
+                
+                const worksheet = workbook.worksheets[0];
+                const result = { labels: [], actual: [], arima: [], arimax: [], lstm: [], xgboost: [], arimalstm: [] };
+                
+                worksheet.eachRow((row, rowNumber) => {
+                    if (rowNumber > 1) { // Skip header row
+                        const values = row.values;
+                        result.labels.push(values[1]); // Kolom A: Periode
+                        result.actual.push(values[2]); // Kolom B: Data Aktual
+                        result.arima.push(values[3]); // Kolom C: ARIMA
+                        result.arimax.push(values[4]); // Kolom D: ARIMAX
+                        result.lstm.push(values[5]); // Kolom E: LSTM
+                        result.xgboost.push(values[6]); // Kolom F: XGBoost
+                        result.arimalstm.push(values[7]); // Kolom G: ARIMA-LSTM
+                    }
+                });
+                
+                return result;
+            }
+
+            function renderPredictionChart(model) {
+                const ctx = document.getElementById('predictionChartCanvas').getContext('2d');
+                
+                // Destroy the previous chart instance if it exists
+                if (predictionChartInstance) {
+                    predictionChartInstance.destroy();
+                }
+                
+                // Prepare datasets for the chart
+                const datasets = [
+                    {
+                        label: 'Data Aktual',
+                        data: predictionData.actual,
+                        borderColor: '#F97316',            // Tailwind Orange   
+                        backgroundColor: 'rgba(249, 115, 22, 0.15)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: model.toUpperCase(),
+                        data: predictionData[model],
+                        borderColor: '#10B981',            // Tailwind Emerald
+                        backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                        tension: 0.3,
+                        fill: true
+                    }
+                ];
+
+                // Create a new chart instance
+                predictionChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: predictionData.labels.map(formatDateToMonthYear), // Format labels
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `Prediksi Model: ${model.toUpperCase()}`,
+                                font: {
+                                    size: 18,
+                                    weight: 'bold'
+                                }
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
+                            },
+                            legend: {
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                title: {
+                                    display: true,
+                                    text: 'Volume (kg)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Periode'
+                                }
+                            }
+                        },
+                        interaction: {
+                            mode: 'nearest',
+                            axis: 'x',
+                            intersect: false
+                        }
+                    }
+                });
+            }
+
+            // Event listeners for prediction model buttons
+            document.querySelectorAll('.prediction-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.prediction-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                this.classList.add('active');
+                    
+                const model = button.getAttribute('data-model');
+                renderPredictionChart(model);
+                });
+            });
+    </script>
+</body>
+</html>
