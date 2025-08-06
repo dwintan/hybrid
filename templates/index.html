@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Prediksi ARIMA-LSTM</title>
+    <title>Peramalan ARIMA-LSTM</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
@@ -140,7 +140,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>Prediksi dengan ARIMA-LSTM</h2>
+        <h2>Peramalan dengan ARIMA-LSTM</h2>
         <form method="post" enctype="multipart/form-data" onsubmit="showLoading()">
             <label for="file">Upload File Excel (1 kolom nilai Y)</label>
             <div class="custom-file-wrapper">
@@ -148,10 +148,10 @@
                 <input type="file" name="file" id="file" required onchange="updateFileName()">
             </div>
 
-            <label for="horizon">Jumlah Bulan yang Diprediksi</label>
+            <label for="horizon">Jumlah Bulan yang Diramalkan</label>
             <input type="number" name="horizon" id="horizon" value="12" min="1" required>
 
-            <input type="submit" value="Prediksi">
+            <input type="submit" value="Peramalan">
             <div id="loading-message" style="display: none; margin-top: 20px; text-align: center;">
                 <div class="spinner"></div>
                 <div style="color: #007bff; font-weight: 500;">Mohon tunggu, model sedang memproses...</div>

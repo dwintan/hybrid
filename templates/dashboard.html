@@ -337,7 +337,7 @@
         <div class="logo-area">
             <i class="fas fa-database"></i>
             <div class="title-text">
-                <div class="main-title">Dashboard Prediksi Impor Tekstil dan Produk Tekstil</div>
+                <div class="main-title">Dashboard Peramalan Impor Tekstil dan Produk Tekstil</div>
                 <div class="sub-title">Menggunakan Indeks Google Trends dan Sentimen Berita</div>
             </div>
         </div>
@@ -352,7 +352,7 @@
                 <li id="latar-btn" onclick="showSection('latar')"><i class="fas fa-book-open"></i><span>Latar Belakang</span></li>
                 <li id="metodologi-btn" onclick="showSection('metodologi')"><i class="fas fa-tools"></i><span>Metodologi</span></li>
                 <li id="hasil-btn" onclick="showSection('hasil')"><i class="fas fa-chart-bar"></i><span>Hasil</span></li>
-                <li id="prediksi-btn" onclick="showSection('prediksi')"><i class="fas fa-robot"></i><span>Simulasi Prediksi</span></li>
+                <li id="prediksi-btn" onclick="showSection('prediksi')"><i class="fas fa-robot"></i><span>Simulasi Peramalan</span></li>
             </ul>
         </div>
 
@@ -430,8 +430,8 @@
                         </tr>
                     </tbody>
                 </table>
-                <p>Prediksi terhadap volume impor tekstil, khususnya pada kelompok kode HS yang berkorelasi negatif dengan tenaga kerja penting dilakukan untuk mengantisipasi dampaknya terhadap industri lokal. Dengan melakukan prediksi secara akurat, pemerintah dapat menyusun strategi yang lebih efektif dalam menjaga keberlangsungan industri TPT sekaligus melindungi tenaga kerja. Prediksi impor memungkinkan pemerintah untuk merancang kebijakan tarif dan kuota guna melindungi industri tekstil lokal dari banjir produk impor murah. Dengan demikian, prediksi impor tidak hanya berfungsi sebagai alat analisis, tetapi juga sebagai dasar pengambilan keputusan strategis bagi pemerintah dalam mengelola sektor industri (Nurcahyo et al., 2023).</p>
-                <p>Penggunaan indeks Google Trends dan sentimen berita telah banyak digunakan untuk meningkatkan akurasi peramalan (Abyasa & Nurmawati, 2024; Apriliani & Nurmawati, 2024; Ayuningtyas & Wirawati, 2021; Giri et al., 2019; Lukauskas et al., 2022). Google Trends dapat digunakan sebagai indikator sentimen publik atau tingkat ketertarikan di bidang ekonomi sehingga dapat dimanfaatkan untuk memprediksi kondisi ekonomi makro (Yusuf Kamal et al., 2024). Sementara itu, Lukauskas et. al. menunjukkan bahwa penggunaan sentimen negatif media massa di Lithuania dalam peramalan aktivitas ekonomi dapat mengurangi kesalahan model dengan MAPE lebih rendah (Lukauskas et al., 2022). Shapiro et al. (2022) juga menemukan bahwa sentimen dapat memprediksi hasil ekonomi masa depan (A. H. Shapiro et al., 2022). Sentimen yang diekstrak dari artikel berita mempunyai kontribusi terhadap perkiraan indikator makro ekonomi (Gerrish & Blei, 2011; Sukmana et al., 2022). Penelitian (Adriansah et al., 2020) menunjukkan bahwa sentimen berita dapat digunakan untuk menilai dan membandingkan perkembangan neraca perdagangan, termasuk impor. Oleh karena itu, variabel eksogen yang digunakan dalam penelitian ini yaitu nilai kurs rupiah terhadap USD, indeks produksi tekstil, indeks Google Trends, dan sentimen berita online terkait impor tekstil. </p>
+                <p>Peramalan terhadap volume impor tekstil, khususnya pada kelompok kode HS yang berkorelasi negatif dengan tenaga kerja penting dilakukan untuk mengantisipasi dampaknya terhadap industri lokal. Dengan melakukan peramalan secara akurat, pemerintah dapat menyusun strategi yang lebih efektif dalam menjaga keberlangsungan industri TPT sekaligus melindungi tenaga kerja. Peramalan nilai impor yang akurat sangat penting bagi perencanaan ekonomi dan perumusan kebijakan yang efektif, khususnya di negara berkembang seperti Indonesia (Gusleo & Passarella, 2025). Peramalan impor memungkinkan pemerintah untuk merancang kebijakan tarif dan kuota guna melindungi industri tekstil lokal dari banjir produk impor murah.</p>
+                <p>Penggunaan indeks Google Trends dan sentimen berita telah banyak digunakan untuk meningkatkan akurasi peramalan (Abyasa & Nurmawati, 2024; Apriliani & Nurmawati, 2024; Ayuningtyas & Wirawati, 2021; Giri et al., 2019; Lukauskas et al., 2022). Google Trends dapat digunakan sebagai indikator sentimen publik atau tingkat ketertarikan di bidang ekonomi sehingga dapat dimanfaatkan untuk meramalkan kondisi ekonomi makro (Yusuf Kamal et al., 2024). Sementara itu, Lukauskas et. al. menunjukkan bahwa penggunaan sentimen negatif media massa di Lithuania dalam peramalan aktivitas ekonomi dapat mengurangi kesalahan model dengan MAPE lebih rendah (Lukauskas et al., 2022). Shapiro et al. (2022) juga menemukan bahwa sentimen dapat memprediksi hasil ekonomi masa depan (A. H. Shapiro et al., 2022). Sentimen yang diekstrak dari artikel berita mempunyai kontribusi terhadap perkiraan indikator makro ekonomi (Gerrish & Blei, 2011; Sukmana et al., 2022). Penelitian (Adriansah et al., 2020) menunjukkan bahwa sentimen berita dapat digunakan untuk menilai dan membandingkan perkembangan neraca perdagangan, termasuk impor. Oleh karena itu, variabel eksogen yang digunakan dalam penelitian ini yaitu nilai kurs rupiah terhadap USD, indeks produksi tekstil, indeks Google Trends, dan sentimen berita online terkait impor tekstil. </p>
             </div>
 
             <div id="metodologi" class="section">
@@ -439,8 +439,8 @@
                 <div class="image-section">
                     <img src="{{ url_for('static', filename='Business Understanding (1).png') }}" alt="CRISP-DM" style="max-width: 100%; width: 400px; height: auto;"/>
                 </div>
-                <p>Proses pengembangan model prediksi dilakukan berdasarkan metodologi CRISP-DM yang terdiri atas enam tahapan utama: Business Understanding, Data Understanding, Data Preparation, Modeling, Evaluation, dan Deployment.</p>
-                <p>Pada tahap <b>Business Understanding</b>, ditetapkan tujuan untuk membangun model prediksi impor tekstil Indonesia sebagai dasar perumusan kebijakan ekonomi. Tahap <b>Data Understanding</b> melibatkan pengumpulan dan eksplorasi awal terhadap data. Selanjutnya, <b>Data Preparation</b> mencakup pemrosesan awal, pelabelan sentimen berita, perhitungan korelasi, serta seleksi fitur. Pada tahap <b>Modeling</b>, dilakukan pembangunan model prediksi menggunakan metode statistik konvensional yaitu ARIMA DAN ARIMAX, machine learning seperti LSTM dan XGBoost, hybrid ARIMA-LSTM. <b>Evaluation</b> dilakukan dengan mengukur akurasi model menggunakan metrik seperti MAE, RMSE, dan MAPE. Terakhir, tahap <b>Deployment</b> membuat web story mengenai prediksi impor tekstil Indonesia.</p>
+                <p>Proses pengembangan model peramalan dilakukan berdasarkan metodologi CRISP-DM yang terdiri atas enam tahapan utama: Business Understanding, Data Understanding, Data Preparation, Modeling, Evaluation, dan Deployment.</p>
+                <p>Pada tahap <b>Business Understanding</b>, ditetapkan tujuan untuk membangun model peramalan impor tekstil Indonesia sebagai dasar perumusan kebijakan ekonomi. Tahap <b>Data Understanding</b> melibatkan pengumpulan dan eksplorasi awal terhadap data. Selanjutnya, <b>Data Preparation</b> mencakup pemrosesan awal, pelabelan sentimen berita, perhitungan korelasi, serta seleksi fitur. Pada tahap <b>Modeling</b>, dilakukan pembangunan model peramalan menggunakan metode statistik konvensional yaitu ARIMA DAN ARIMAX, machine learning seperti LSTM dan XGBoost, hybrid ARIMA-LSTM. <b>Evaluation</b> dilakukan dengan mengukur akurasi model menggunakan metrik seperti MAE, RMSE, dan MAPE. Terakhir, tahap <b>Deployment</b> membuat web story mengenai peramalan impor tekstil Indonesia.</p>
             </div>
             
             <div class="hasil-wrapper">
@@ -451,7 +451,7 @@
                 <div class="image-section">
                     <img src="{{ url_for('static', filename='plot_neg.png') }}" alt="Hasil Korelasi" />
                 </div>
-                    <p>Pada tabel, dapat dilihat bahwa tidak semua kode HS volume impor TPT berkorelasi negatif dengan jumlah tenaga kerja lapangan usaha tekstil. Kode HS volume impor TPT yang berkorelasi negatif antara lain 56, 60, dan 63. Hal ini mengindikasikan bahwa ketika volume impor untuk kode HS 56, 60, dan 63 meningkat, maka jumlah tenaga kerja lapangan usaha tekstil akan menurun, dan sebaliknya. Kode HS 56 mencakup gumpalan, kain kempa, dan bukan tenunan; benang khusus; benang pintal, tali, tambang, kabel, dan barang yang terbuat dari bahan-bahan tersebut. Selanjutnya, kode HS 60 mengacu pada kain rajutan atau kaitan. Sementara itu, kode HS 63 mencakup barang tekstil jadi lainnya; set; pakaian bekas dan barang tekstil bekas; kain perca. Kode-kode HS tersebut kemudian diagregasi menjadi variabel Y, yang kemudian digunakan sebagai untuk melakukan prediksi</p>
+                    <p>Pada tabel, dapat dilihat bahwa tidak semua kode HS volume impor TPT berkorelasi negatif dengan jumlah tenaga kerja lapangan usaha tekstil. Kode HS volume impor TPT yang berkorelasi negatif antara lain 56, 60, dan 63. Hal ini mengindikasikan bahwa ketika volume impor untuk kode HS 56, 60, dan 63 meningkat, maka jumlah tenaga kerja lapangan usaha tekstil akan menurun, dan sebaliknya. Kode HS 56 mencakup gumpalan, kain kempa, dan bukan tenunan; benang khusus; benang pintal, tali, tambang, kabel, dan barang yang terbuat dari bahan-bahan tersebut. Selanjutnya, kode HS 60 mengacu pada kain rajutan atau kaitan. Sementara itu, kode HS 63 mencakup barang tekstil jadi lainnya; set; pakaian bekas dan barang tekstil bekas; kain perca. Kode-kode HS tersebut kemudian diagregasi menjadi variabel Y, yang kemudian digunakan sebagai untuk melakukan peramalan</p>
                 
                 <h3 id="sentimen">Pelabelan Sentimen</h3>
                 <p>Jumlah berita online dikumpulkan dengan kata kunci “impor tekstil” sebanyak 979 berita. Setelah dilakukan pemrosesan awal data didapatkan sebanyak 204 berita. Selanjutnya dilakukan proses pelabelan secara manual oleh satu orang anotator terhadap keseluruhan berita. </p>
@@ -520,10 +520,10 @@
                 </div>
 
                 <h3 id="modelling">Modelling</h3>
-                <h4>Grafik Hasil Prediksi Model</h4>
+                <h4>Grafik Hasil Peramalan Model</h4>
                 <div class="container">                  
                     <div class="info-text">
-                        Grafik di bawah ini menampilkan hasil prediksi masing-masing model yang dipilih.
+                        Grafik di bawah ini menampilkan hasil peramalan masing-masing model yang dipilih.
                     </div>
                     <div class="button-group">
                         <button class="prediction-button" data-model="arima">ARIMA</button>
@@ -596,16 +596,16 @@
                         </tr>
                     </tbody>
                 </table>
-                <p>Berdasarkan hasil perbandingan, model ARIMA-LSTM memiliki kinerja terbaik dengan nilai RMSE, MAE, dan MAPE terendah, yaitu masing-masing sebesar 4103511,65, 3194740,92, dan 8,96%. Hasil ini menunjukkan bahwa model ARIMA-LSTM mampu memprediksi dengan kesalahan yang lebih rendah dibandingkan model lainnya. Hasil ini konsisten dengan temuan Dave et. al (2021), yang menyatakan bahwa pendekatan hybrid antara ARIMA dan LSTM mampu memberikan prediksi yang lebih akurat dibandingkan model tunggal (Dave et al., 2021). 
-                <p>Dengan mempertimbangkan trade-off antara akurasi dan efisiensi waktu pelatihan, ARIMA-LSTM tetap menjadi model yang paling unggul dalam penelitian ini. Model ini layak dipilih sebagai dasar pengambilan keputusan karena mampu memprediksi dengan lebih akurat meskipun memerlukan sedikit waktu lebih lama dalam pelatihan.</p>
-                <p>Model ARIMA-LSTM dipilih sebagai model terbaik untuk memprediksi volume impor TPT. Prediksi dilakukan untuk 12 bulan ke depan yaitu Juli 2024 – Juni 2025. </p>
+                <p>Berdasarkan hasil perbandingan, model ARIMA-LSTM memiliki kinerja terbaik dengan nilai RMSE, MAE, dan MAPE terendah, yaitu masing-masing sebesar 4103511,65, 3194740,92, dan 8,96%. Hasil ini menunjukkan bahwa model ARIMA-LSTM mampu meramalkan dengan kesalahan yang lebih rendah dibandingkan model lainnya. Hasil ini konsisten dengan temuan Dave et. al (2021), yang menyatakan bahwa pendekatan hybrid antara ARIMA dan LSTM mampu memberikan prediksi yang lebih akurat dibandingkan model tunggal (Dave et al., 2021). 
+                <p>Dengan mempertimbangkan trade-off antara akurasi dan efisiensi waktu pelatihan, ARIMA-LSTM tetap menjadi model yang paling unggul dalam penelitian ini. Model ini layak dipilih sebagai dasar pengambilan keputusan karena mampu meramalkan dengan lebih akurat meskipun memerlukan sedikit waktu lebih lama dalam pelatihan.</p>
+                <p>Model ARIMA-LSTM dipilih sebagai model terbaik untuk memramalkan volume impor TPT. Peramalan dilakukan untuk 12 bulan ke depan yaitu Juli 2024 – Juni 2025. </p>
                            
-                <h3 id="pred">Hasil Prediksi</h3>
+                <h3 id="pred">Hasil Peramalan</h3>
                 <table>
                     <thead>
                         <tr>
                             <th>Bulan</th>
-                            <th>Prediksi</th>
+                            <th>Peramalan</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -664,12 +664,12 @@
                     </tbody>
                 </table>
                 <p>Berdasarkan Tabel, total volume impor TPT dengan kode HS 56, 60, dan 63 pada periode Juli 2024 – Juni 2025 mengalami kenaikan sebesar 9,90% dibandingkan dengan periode yang sama tahun lalu. Peningkatan ini menjadi peringatan dini bagi pemerintah untuk merumuskan kebijakan yang efektif dan aplikatif dalam membatasi impor TPT dengan kode HS 56, 60, dan 63.</p>
-                <p>Pemerintah dapat menggunakan hasil prediksi ini untuk merumuskan intervensi berbasis data seperti penguatan monitoring terhadap impor tekstil terutama kode HS 56, 60, 63 dan menyusun kebijakan safeguard selektif terhadap impor pada kode HS tersebut. Pemerintah perlu memastikan bahwa setiap potensi pengurangan impor diiringi oleh peningkatan kapasitas produksi dalam negeri agar peluang penyerapan tenaga kerja benar-benar dapat dimanfaatkan. Dukungan dalam bentuk insentif produksi, pelatihan keterampilan tenaga kerja, serta investasi dalam teknologi manufaktur tekstil menjadi sangat penting untuk menjembatani pergeseran ini.</p>
+                <p>Pemerintah dapat menggunakan hasil peramalan ini untuk merumuskan intervensi berbasis data seperti penguatan monitoring terhadap impor tekstil terutama kode HS 56, 60, 63 dan menyusun kebijakan safeguard selektif terhadap impor pada kode HS tersebut. Pemerintah perlu memastikan bahwa setiap potensi pengurangan impor diiringi oleh peningkatan kapasitas produksi dalam negeri agar peluang penyerapan tenaga kerja benar-benar dapat dimanfaatkan. Dukungan dalam bentuk insentif produksi, pelatihan keterampilan tenaga kerja, serta investasi dalam teknologi manufaktur tekstil menjadi sangat penting untuk menjembatani pergeseran ini.</p>
             </div>
             </div>
 
             <div id="prediksi" class="section">
-                <h2>Simulasi Prediksi</h2>
+                <h2>Simulasi Peramalan</h2>
                 <iframe src="/prediksi" width="100%" height="600" frameborder="0" style="background: #fff;"></iframe>       
             </div>
 
@@ -681,7 +681,7 @@
             <a href="#eksplorasi">Eksplorasi</a>
             <a href="#modelling">Modelling</a>
             <a href="#evaluasi">Evaluasi</a>
-            <a href="#pred">Hasil Prediksi</a>
+            <a href="#pred">Hasil Peramalan</a>
         </nav>
     </div>
 
